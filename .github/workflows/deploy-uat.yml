@@ -1,0 +1,37 @@
+# Deploy to UAT: manual trigger, choose one component (poll / predictor / quiz).
+# Trigger: Actions → Deploy UAT → Run workflow → select component from dropdown.
+
+name: Deploy UAT
+
+on:
+  workflow_dispatch:
+    inputs:
+      component:
+        description: 'Component to deploy'
+        required: true
+        type: choice
+        options:
+          - poll
+          - predictor
+          - quiz
+        default: poll
+
+jobs:
+  deploy:
+    name: Deploy ${{ github.event.inputs.component }} (UAT)
+    runs-on: ubuntu-latest
+    environment: uat
+    env:
+      S3_BUCKET: ${{ vars.S3_BUCKET }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Debug bucket
+        run: echo "S3_BUCKET (UAT) = ${{ vars.S3_BUCKET }}"
+
+      - name: Run ${{ github.event.inputs.component }} script
+        run: |
+          COMPONENT="${{ github.event.inputs.component }}"
+          chmod +x "$COMPONENT/main.sh"
+          "./$COMPONENT/main.sh"
