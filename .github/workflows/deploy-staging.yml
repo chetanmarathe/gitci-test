@@ -13,8 +13,9 @@ jobs:
   detect-changes:
     name: Detect changed paths
     runs-on: ubuntu-latest
+    environment: staging
     env:
-      S3_BUCKET: ${{ secrets.S3_BUCKET }}
+      S3_BUCKET: ${{ vars.S3_BUCKET }}
     outputs:
       poll: ${{ steps.filter.outputs.poll }}
       predictor: ${{ steps.filter.outputs.predictor }}
@@ -44,6 +45,9 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.poll == 'true'
     runs-on: ubuntu-latest
+    environment: staging
+    env:
+      S3_BUCKET: ${{ vars.S3_BUCKET }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -56,6 +60,9 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.predictor == 'true'
     runs-on: ubuntu-latest
+    environment: staging
+    env:
+      S3_BUCKET: ${{ vars.S3_BUCKET }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -68,6 +75,9 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.quiz == 'true'
     runs-on: ubuntu-latest
+    environment: staging
+    env:
+      S3_BUCKET: ${{ vars.S3_BUCKET }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
