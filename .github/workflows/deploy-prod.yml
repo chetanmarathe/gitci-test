@@ -1,27 +1,20 @@
-# Deploy to prod: runs only scripts for directories that changed.
-# Triggers on push to main.
-# - Changes in poll/     → runs poll/main.sh
-# - Changes in predictor/ → runs predictor/main.sh
-# - Changes in quiz/     → runs quiz/main.sh
+# Deploy to prod: manual trigger, auto-detects which directories changed.
+# Trigger: manual only (Actions → Deploy Prod → Run workflow).
+# On run: compares last commit (HEAD vs HEAD~1) and runs only the deploy jobs
+# for directories that changed: poll/, predictor/, or quiz/.
 
 name: Deploy Prod
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'poll/**'
-      - 'predictor/**'
-      - 'quiz/**'
+  workflow_dispatch:
 
 jobs:
   detect-changes:
     name: Detect changed paths
     runs-on: ubuntu-latest
-    environment: prod
+    environment: production
     env:
-      S3_BUCKET: ${{ secrets.S3_BUCKET }}
+      S3_BUCKET: ${{ vars.S3_BUCKET }}
     outputs:
       poll: ${{ steps.filter.outputs.poll }}
       predictor: ${{ steps.filter.outputs.predictor }}
@@ -36,6 +29,7 @@ jobs:
         uses: dorny/paths-filter@v3
         id: filter
         with:
+          base: HEAD~1
           filters: |
             poll:
               - 'poll/**'
@@ -43,20 +37,31 @@ jobs:
               - 'predictor/**'
             quiz:
               - 'quiz/**'
+
+      - name: Debug detected changes
+        run: |
+          echo "Directories with changes (will run only these):"
+          echo "  poll: ${{ steps.filter.outputs.poll }}"
+          echo "  predictor: ${{ steps.filter.outputs.predictor }}"
+          echo "  quiz: ${{ steps.filter.outputs.quiz }}"
+
       - name: Debug bucket
-        run: echo "Using bucket $S3_BUCKET"
+        run: echo "S3_BUCKET (prod) = $S3_BUCKET"
 
   deploy-poll:
     name: Deploy poll (prod)
     needs: detect-changes
     if: needs.detect-changes.outputs.poll == 'true'
     runs-on: ubuntu-latest
-    environment: prod
+    environment: production
     env:
       S3_BUCKET: ${{ vars.S3_BUCKET }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Debug bucket
+        run: echo "S3_BUCKET (prod) = $S3_BUCKET"
 
       - name: Run poll script
         run: chmod +x poll/main.sh && ./poll/main.sh
@@ -66,12 +71,15 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.predictor == 'true'
     runs-on: ubuntu-latest
-    environment: prod
+    environment: production
     env:
       S3_BUCKET: ${{ vars.S3_BUCKET }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Debug bucket
+        run: echo "S3_BUCKET (prod) = $S3_BUCKET"
 
       - name: Run predictor script
         run: chmod +x predictor/main.sh && ./predictor/main.sh
@@ -81,12 +89,15 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.quiz == 'true'
     runs-on: ubuntu-latest
-    environment: prod
+    environment: production
     env:
       S3_BUCKET: ${{ vars.S3_BUCKET }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Debug bucket
+        run: echo "S3_BUCKET (prod) = $S3_BUCKET"
 
       - name: Run quiz script
         run: chmod +x quiz/main.sh && ./quiz/main.sh
