@@ -13,7 +13,7 @@ jobs:
   detect-changes:
     name: Detect changed paths
     runs-on: ubuntu-latest
-    environment: staging
+    environment: stage
     env:
       S3_BUCKET: ${{ vars.S3_BUCKET }}
     outputs:
@@ -45,7 +45,7 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.poll == 'true'
     runs-on: ubuntu-latest
-    environment: staging
+    environment: stage
     env:
       S3_BUCKET: ${{ vars.S3_BUCKET }}
     steps:
@@ -60,7 +60,7 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.predictor == 'true'
     runs-on: ubuntu-latest
-    environment: staging
+    environment: stage
     env:
       S3_BUCKET: ${{ vars.S3_BUCKET }}
     steps:
@@ -75,7 +75,7 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.quiz == 'true'
     runs-on: ubuntu-latest
-    environment: staging
+    environment: stage
     env:
       S3_BUCKET: ${{ vars.S3_BUCKET }}
     steps:
