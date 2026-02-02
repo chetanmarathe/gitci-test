@@ -16,35 +16,32 @@ jobs:
     env:
       S3_BUCKET: ${{ vars.S3_BUCKET }}
     outputs:
-      poll: ${{ steps.filter.outputs.poll }}
-      predictor: ${{ steps.filter.outputs.predictor }}
-      quiz: ${{ steps.filter.outputs.quiz }}
+      poll: ${{ steps.changes.outputs.poll }}
+      predictor: ${{ steps.changes.outputs.predictor }}
+      quiz: ${{ steps.changes.outputs.quiz }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 2
 
-      - name: Paths filter
-        uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          base: HEAD~1
-          ref: HEAD
-          filters: |
-            poll:
-              - 'poll/**'
-            predictor:
-              - 'predictor/**'
-            quiz:
-              - 'quiz/**'
-
-      - name: Debug detected changes
+      - name: Detect changed paths
+        id: changes
         run: |
+          CHANGED=$(git diff --name-only HEAD^ HEAD 2>/dev/null || echo "")
+          poll=false
+          predictor=false
+          quiz=false
+          echo "$CHANGED" | grep -q '^poll/' && poll=true
+          echo "$CHANGED" | grep -q '^predictor/' && predictor=true
+          echo "$CHANGED" | grep -q '^quiz/' && quiz=true
+          echo "poll=$poll" >> "$GITHUB_OUTPUT"
+          echo "predictor=$predictor" >> "$GITHUB_OUTPUT"
+          echo "quiz=$quiz" >> "$GITHUB_OUTPUT"
           echo "Directories with changes (will run only these):"
-          echo "  poll: ${{ steps.filter.outputs.poll }}"
-          echo "  predictor: ${{ steps.filter.outputs.predictor }}"
-          echo "  quiz: ${{ steps.filter.outputs.quiz }}"
+          echo "  poll: $poll"
+          echo "  predictor: $predictor"
+          echo "  quiz: $quiz"
 
       - name: Debug bucket
         run: echo "S3_BUCKET (prod) = $S3_BUCKET"
