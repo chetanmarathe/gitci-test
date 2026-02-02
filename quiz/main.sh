@@ -1,1 +1,1 @@
-echo "Hello quiz - GitHub build ID: $GITHUB_RUN_ID"
+echo "Hello quiz 1 - GitHub build ID: $GITHUB_RUN_ID"
