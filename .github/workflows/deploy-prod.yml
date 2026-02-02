@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: prod
     env:
-      S3_BUCKET: ${{ secrets.S3_BUCKET }}
+      S3_BUCKET: ${{ vars.S3_BUCKET }}
     outputs:
       poll: ${{ steps.filter.outputs.poll }}
       predictor: ${{ steps.filter.outputs.predictor }}
