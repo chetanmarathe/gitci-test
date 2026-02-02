@@ -1,0 +1,78 @@
+# Deploy to prod: runs only scripts for directories that changed.
+# Triggers on push to main.
+# - Changes in poll/     → runs poll/main.sh
+# - Changes in predictor/ → runs predictor/main.sh
+# - Changes in quiz/     → runs quiz/main.sh
+
+name: Deploy Prod
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'poll/**'
+      - 'predictor/**'
+      - 'quiz/**'
+
+jobs:
+  detect-changes:
+    name: Detect changed paths
+    runs-on: ubuntu-latest
+    outputs:
+      poll: ${{ steps.filter.outputs.poll }}
+      predictor: ${{ steps.filter.outputs.predictor }}
+      quiz: ${{ steps.filter.outputs.quiz }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Paths filter
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            poll:
+              - 'poll/**'
+            predictor:
+              - 'predictor/**'
+            quiz:
+              - 'quiz/**'
+
+  deploy-poll:
+    name: Deploy poll (prod)
+    needs: detect-changes
+    if: needs.detect-changes.outputs.poll == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run poll script
+        run: chmod +x poll/main.sh && ./poll/main.sh
+
+  deploy-predictor:
+    name: Deploy predictor (prod)
+    needs: detect-changes
+    if: needs.detect-changes.outputs.predictor == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run predictor script
+        run: chmod +x predictor/main.sh && ./predictor/main.sh
+
+  deploy-quiz:
+    name: Deploy quiz (prod)
+    needs: detect-changes
+    if: needs.detect-changes.outputs.quiz == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run quiz script
+        run: chmod +x quiz/main.sh && ./quiz/main.sh
