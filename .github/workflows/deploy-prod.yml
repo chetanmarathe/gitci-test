@@ -19,6 +19,8 @@ jobs:
   detect-changes:
     name: Detect changed paths
     runs-on: ubuntu-latest
+    env:
+      S3_BUCKET: ${{ secrets.S3_BUCKET }}
     outputs:
       poll: ${{ steps.filter.outputs.poll }}
       predictor: ${{ steps.filter.outputs.predictor }}
@@ -40,6 +42,8 @@ jobs:
               - 'predictor/**'
             quiz:
               - 'quiz/**'
+      - name: Debug bucket
+        run: echo "Using bucket $S3_BUCKET"
 
   deploy-poll:
     name: Deploy poll (prod)
