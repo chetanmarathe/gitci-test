@@ -30,6 +30,7 @@ jobs:
         id: filter
         with:
           base: HEAD~1
+          ref: HEAD
           filters: |
             poll:
               - 'poll/**'
