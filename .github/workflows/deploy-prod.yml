@@ -12,7 +12,7 @@ jobs:
   detect-changes:
     name: Detect changed paths
     runs-on: ubuntu-latest
-    environment: production
+    environment: prod
     env:
       S3_BUCKET: ${{ vars.S3_BUCKET }}
     outputs:
@@ -44,14 +44,14 @@ jobs:
           echo "  quiz: $quiz"
 
       - name: Debug bucket
-        run: echo "S3_BUCKET (prod) = $S3_BUCKET"
+        run: echo "S3_BUCKET (prod) = ${{ vars.S3_BUCKET }}"
 
   deploy-poll:
     name: Deploy poll (prod)
     needs: detect-changes
     if: needs.detect-changes.outputs.poll == 'true'
     runs-on: ubuntu-latest
-    environment: production
+    environment: prod
     env:
       S3_BUCKET: ${{ vars.S3_BUCKET }}
     steps:
@@ -59,7 +59,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Debug bucket
-        run: echo "S3_BUCKET (prod) = $S3_BUCKET"
+        run: echo "S3_BUCKET (prod) = ${{ vars.S3_BUCKET }}"
 
       - name: Run poll script
         run: chmod +x poll/main.sh && ./poll/main.sh
@@ -69,7 +69,7 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.predictor == 'true'
     runs-on: ubuntu-latest
-    environment: production
+    environment: prod
     env:
       S3_BUCKET: ${{ vars.S3_BUCKET }}
     steps:
@@ -77,7 +77,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Debug bucket
-        run: echo "S3_BUCKET (prod) = $S3_BUCKET"
+        run: echo "S3_BUCKET (prod) = ${{ vars.S3_BUCKET }}"
 
       - name: Run predictor script
         run: chmod +x predictor/main.sh && ./predictor/main.sh
@@ -87,7 +87,7 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.quiz == 'true'
     runs-on: ubuntu-latest
-    environment: production
+    environment: prod
     env:
       S3_BUCKET: ${{ vars.S3_BUCKET }}
     steps:
@@ -95,7 +95,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Debug bucket
-        run: echo "S3_BUCKET (prod) = $S3_BUCKET"
+        run: echo "S3_BUCKET (prod) = ${{ vars.S3_BUCKET }}"
 
       - name: Run quiz script
         run: chmod +x quiz/main.sh && ./quiz/main.sh
